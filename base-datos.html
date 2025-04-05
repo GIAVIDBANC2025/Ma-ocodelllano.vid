@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Base de Datos - Facturas</title>
+  <meta charset="UTF-8">
+  <title>Base de Datos de Facturas</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #f0f0f0; }
-    input[type="text"] { width: 300px; padding: 8px; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    input { padding: 8px; width: 100%; max-width: 300px; }
   </style>
 </head>
 <body>
-  <h1>Registros de Facturas - Mañoco del Llano</h1>
-
-  <label for="buscador">Buscar por Cliente o Factura #:</label>
-  <input type="text" id="buscador" placeholder="Ej: Juan Pérez o 1001" onkeyup="filtrarTabla()" />
-
+  <h1>Base de Datos de Facturas</h1>
+  <input type="text" id="buscador" placeholder="Buscar por Cliente o Factura #:" onkeyup="filtrarTabla()">
   <table id="tablaDatos">
     <thead>
       <tr>
-        <th>Factura #</th>
+        <th># Factura</th>
         <th>Cliente</th>
         <th>Producto</th>
         <th>Cantidad</th>
@@ -30,16 +27,16 @@
         <th>Formato</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+    </tbody>
   </table>
 
   <script>
-    const tabla = document.querySelector("#tablaDatos tbody");
-    const datos = JSON.parse(localStorage.getItem("datos")) || [];
-
     function cargarDatos() {
+      const registros = JSON.parse(localStorage.getItem("datos")) || [];
+      const tabla = document.querySelector("#tablaDatos tbody");
       tabla.innerHTML = "";
-      datos.forEach(reg => {
+      registros.forEach(reg => {
         const fila = document.createElement("tr");
         fila.innerHTML = `
           <td>${reg.numero}</td>
@@ -49,22 +46,22 @@
           <td>$${reg.precio.toLocaleString()}</td>
           <td>$${reg.total.toLocaleString()}</td>
           <td>${reg.fecha}</td>
-          <td>${reg.formato.toUpperCase()}</td>
+          <td>${reg.formato}</td>
         `;
         tabla.appendChild(fila);
       });
     }
 
     function filtrarTabla() {
-      const filtro = document.getElementById("buscador").value.toLowerCase();
-      const filas = tabla.getElementsByTagName("tr");
-      for (let i = 0; i < filas.length; i++) {
-        const filaTexto = filas[i].innerText.toLowerCase();
-        filas[i].style.display = filaTexto.includes(filtro) ? "" : "none";
-      }
+      const input = document.getElementById("buscador").value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaDatos tbody tr");
+      filas.forEach(fila => {
+        const texto = fila.innerText.toLowerCase();
+        fila.style.display = texto.includes(input) ? "" : "none";
+      });
     }
 
-    cargarDatos();
+    window.onload = cargarDatos;
   </script>
 </body>
 </html>
