@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <title>Base de Datos de Facturas</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    input { padding: 8px; width: 100%; max-width: 300px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #333; color: #fff; }
+    input { padding: 10px; width: 100%; max-width: 400px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; }
+    a.descargar { text-decoration: none; color: #0066cc; font-weight: bold; }
+    a.descargar:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -25,6 +27,7 @@
         <th>Total</th>
         <th>Fecha</th>
         <th>Formato</th>
+        <th>Descargar</th>
       </tr>
     </thead>
     <tbody>
@@ -32,8 +35,34 @@
   </table>
 
   <script>
+    const facturasDemo = [
+      {
+        numero: "336183",
+        cliente: "Camila López",
+        producto: "Servicio de Asesoría Premium",
+        cantidad: 1,
+        precio: 150000,
+        total: 150000,
+        fecha: "2025-04-05 10:30 AM",
+        formato: "PDF",
+        archivo: "facturas/factura-336183.pdf"
+      },
+      {
+        numero: "336184",
+        cliente: "Carlos Pérez",
+        producto: "Diseño gráfico",
+        cantidad: 2,
+        precio: 70000,
+        total: 140000,
+        fecha: "2025-04-05 11:00 AM",
+        formato: "PNG",
+        archivo: "facturas/factura-336184.png"
+      }
+    ];
+
     function cargarDatos() {
-      const registros = JSON.parse(localStorage.getItem("datos")) || [];
+      const registrosGuardados = JSON.parse(localStorage.getItem("datos")) || [];
+      const registros = [...registrosGuardados, ...facturasDemo];
       const tabla = document.querySelector("#tablaDatos tbody");
       tabla.innerHTML = "";
       registros.forEach(reg => {
@@ -43,10 +72,11 @@
           <td>${reg.cliente}</td>
           <td>${reg.producto}</td>
           <td>${reg.cantidad}</td>
-          <td>$${reg.precio.toLocaleString()}</td>
-          <td>$${reg.total.toLocaleString()}</td>
+          <td>$${parseFloat(reg.precio).toLocaleString()}</td>
+          <td>$${parseFloat(reg.total).toLocaleString()}</td>
           <td>${reg.fecha}</td>
           <td>${reg.formato}</td>
+          <td><a class="descargar" href="${reg.archivo}" target="_blank">Descargar</a></td>
         `;
         tabla.appendChild(fila);
       });
