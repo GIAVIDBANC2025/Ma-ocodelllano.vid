@@ -1,172 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Base de Datos - Mañoco del Llano</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Librerías externas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>Base de Datos - Facturas</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f9f9f9; }
-    h1 { text-align: center; color: #2b2b2b; }
-    form, table, .acciones { max-width: 900px; margin: auto; }
-    input, textarea, select {
-      width: 100%; padding: 10px; margin: 5px 0;
-      border: 1px solid #ccc; border-radius: 6px;
-    }
-    button {
-      background-color: #006400; color: white;
-      padding: 10px 20px; border: none; border-radius: 6px;
-      cursor: pointer; margin: 5px;
-    }
-    button:hover { background-color: #228B22; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td {
-      border: 1px solid #ccc; padding: 10px; text-align: center;
-    }
-    th { background-color: #e0e0e0; }
-    .qr { margin-top: 5px; }
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      td { border: none; border-bottom: 1px solid #ccc; }
-    }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f0f0f0; }
+    input[type="text"] { width: 300px; padding: 8px; margin-top: 10px; }
   </style>
 </head>
 <body>
+  <h1>Registros de Facturas - Mañoco del Llano</h1>
 
-  <h1>Base de Datos - Mañoco del Llano</h1>
+  <label for="buscador">Buscar por Cliente o Factura #:</label>
+  <input type="text" id="buscador" placeholder="Ej: Juan Pérez o 1001" onkeyup="filtrarTabla()" />
 
-  <form id="formulario">
-    <input type="text" id="nombre" placeholder="Nombre del Cliente" required>
-    <input type="text" id="cedula" placeholder="Cédula o NIT" required>
-    <input type="text" id="telefono" placeholder="Teléfono">
-    <input type="email" id="correo" placeholder="Correo Electrónico">
-    <input type="text" id="direccion" placeholder="Dirección">
-    <input type="text" id="producto" placeholder="Producto o Servicio" required>
-    <input type="number" id="cantidad" placeholder="Cantidad" required>
-    <input type="number" id="precio" placeholder="Precio Unitario" required>
-    <textarea id="observaciones" placeholder="Observaciones"></textarea>
-    <button type="submit">Guardar Registro</button>
-  </form>
-
-  <div class="acciones" style="text-align:center;">
-    <button onclick="descargarPDF()">Descargar PDF</button>
-    <button onclick="descargarExcel()">Descargar Excel</button>
-  </div>
-
-  <div id="contenidoPDF">
-    <table id="tabla">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Total</th>
-          <th>Fecha</th>
-          <th>QR</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <table id="tablaDatos">
+    <thead>
+      <tr>
+        <th>Factura #</th>
+        <th>Cliente</th>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Total</th>
+        <th>Fecha</th>
+        <th>Formato</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
-    const form = document.getElementById("formulario");
-    const tabla = document.querySelector("#tabla tbody");
-
-    function generarQR(data) {
-      const div = document.createElement("div");
-      new QRCode(div, {
-        text: data,
-        width: 60,
-        height: 60
-      });
-      return div.innerHTML;
-    }
+    const tabla = document.querySelector("#tablaDatos tbody");
+    const datos = JSON.parse(localStorage.getItem("datos")) || [];
 
     function cargarDatos() {
-      const registros = JSON.parse(localStorage.getItem("datos")) || [];
       tabla.innerHTML = "";
-      registros.forEach((reg, index) => {
-        const qrContent = `Cliente: ${reg.nombre} | Producto: ${reg.producto} | Total: $${parseFloat(reg.total).toLocaleString('es-CO')}`;
-        const qrHTML = generarQR(qrContent);
-
+      datos.forEach(reg => {
         const fila = document.createElement("tr");
         fila.innerHTML = `
-          <td>${reg.nombre}</td>
+          <td>${reg.numero}</td>
+          <td>${reg.cliente}</td>
           <td>${reg.producto}</td>
           <td>${reg.cantidad}</td>
-          <td>$${parseFloat(reg.precio).toLocaleString('es-CO')}</td>
-          <td>$${parseFloat(reg.total).toLocaleString('es-CO')}</td>
+          <td>$${reg.precio.toLocaleString()}</td>
+          <td>$${reg.total.toLocaleString()}</td>
           <td>${reg.fecha}</td>
-          <td class="qr">${qrHTML}</td>
-          <td><button onclick="eliminar(${index})">Eliminar</button></td>
+          <td>${reg.formato.toUpperCase()}</td>
         `;
         tabla.appendChild(fila);
       });
     }
 
-    function eliminar(index) {
-      const registros = JSON.parse(localStorage.getItem("datos"));
-      registros.splice(index, 1);
-      localStorage.setItem("datos", JSON.stringify(registros));
-      cargarDatos();
+    function filtrarTabla() {
+      const filtro = document.getElementById("buscador").value.toLowerCase();
+      const filas = tabla.getElementsByTagName("tr");
+      for (let i = 0; i < filas.length; i++) {
+        const filaTexto = filas[i].innerText.toLowerCase();
+        filas[i].style.display = filaTexto.includes(filtro) ? "" : "none";
+      }
     }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const nombre = document.getElementById("nombre").value;
-      const cedula = document.getElementById("cedula").value;
-      const telefono = document.getElementById("telefono").value;
-      const correo = document.getElementById("correo").value;
-      const direccion = document.getElementById("direccion").value;
-      const producto = document.getElementById("producto").value;
-      const cantidad = document.getElementById("cantidad").value;
-      const precio = document.getElementById("precio").value;
-      const observaciones = document.getElementById("observaciones").value;
-
-      const total = parseFloat(cantidad) * parseFloat(precio);
-      const fecha = new Date().toLocaleString();
-
-      const nuevoRegistro = {
-        nombre, cedula, telefono, correo, direccion,
-        producto, cantidad, precio, total, observaciones, fecha
-      };
-
-      const registros = JSON.parse(localStorage.getItem("datos")) || [];
-      registros.push(nuevoRegistro);
-      localStorage.setItem("datos", JSON.stringify(registros));
-      form.reset();
-      cargarDatos();
-    });
-
-    function descargarPDF() {
-      const elemento = document.getElementById("contenidoPDF");
-      html2pdf().from(elemento).save("base-datos.pdf");
-    }
-
-    function descargarExcel() {
-      const registros = JSON.parse(localStorage.getItem("datos")) || [];
-      const datosExcel = registros.map(r => ({
-        Cliente: r.nombre,
-        Producto: r.producto,
-        Cantidad: r.cantidad,
-        Precio: r.precio,
-        Total: r.total,
-        Fecha: r.fecha
-      }));
-      const ws = XLSX.utils.json_to_sheet(datosExcel);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Registros");
-      XLSX.writeFile(wb, "base-datos.xlsx");
-    }
-
-    window.onload = cargarDatos;
+    cargarDatos();
   </script>
-
 </body>
 </html>
