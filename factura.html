@@ -2,28 +2,31 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Factura - Mañoco del Llano</title>
+  <title>Generador de Facturas - Mañoco del Llano</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, select, button { padding: 8px; margin: 5px; }
+    #factura { display: none; padding: 20px; border: 1px solid #ccc; background: #f9f9f9; }
+  </style>
 </head>
 <body>
-  <h1>Factura Mañoco del Llano</h1>
+  <h1>Generador de Facturas</h1>
   <form id="formularioFactura">
-    <label>Cliente: <input type="text" id="cliente" required /></label><br />
-    <label>Producto: <input type="text" id="producto" required /></label><br />
-    <label>Cantidad: <input type="number" id="cantidad" required /></label><br />
-    <label>Precio Unitario: <input type="number" id="precio" required /></label><br />
-    <label>Formato:
-      <select id="formato">
-        <option value="pdf">PDF</option>
-        <option value="png">PNG</option>
-        <option value="jpg">JPG</option>
-        <option value="word">Word</option>
-      </select>
-    </label><br />
-    <button type="button" onclick="descargarFactura()">Descargar Factura</button>
+    <input type="text" id="cliente" placeholder="Cliente" required />
+    <input type="text" id="producto" placeholder="Producto" required />
+    <input type="number" id="cantidad" placeholder="Cantidad" required />
+    <input type="number" id="precio" placeholder="Precio Unitario" required />
+    <select id="formato">
+      <option value="pdf">PDF</option>
+      <option value="png">PNG</option>
+      <option value="jpg">JPG</option>
+      <option value="word">Word</option>
+    </select>
+    <button type="button" onclick="descargarFactura()">Descargar y Guardar</button>
   </form>
 
-  <div id="factura" style="display:none; padding: 20px; border: 1px solid #ccc;">
+  <div id="factura">
     <h2>Factura Mañoco del Llano</h2>
     <p id="resumenFactura"></p>
   </div>
@@ -47,19 +50,19 @@
       const numeroFactura = generarNumeroFactura();
 
       document.getElementById("resumenFactura").innerText = `
-        Factura #${numeroFactura}
-        Cliente: ${cliente}
-        Producto: ${producto}
-        Cantidad: ${cantidad}
-        Precio Unitario: $${precio.toLocaleString()}
-        Total: $${total.toLocaleString()}
-        Fecha: ${fecha}
+Factura #${numeroFactura}
+Cliente: ${cliente}
+Producto: ${producto}
+Cantidad: ${cantidad}
+Precio Unitario: $${precio.toLocaleString()}
+Total: $${total.toLocaleString()}
+Fecha: ${fecha}
       `;
 
       const factura = document.getElementById("factura");
       factura.style.display = "block";
 
-      const opt = {
+      const opciones = {
         filename: `Factura-${numeroFactura}.${formato === "word" ? "doc" : formato}`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
@@ -67,13 +70,13 @@
       };
 
       if (formato === "pdf") {
-        html2pdf().set(opt).from(factura).save().then(() => {
+        html2pdf().set(opciones).from(factura).save().then(() => {
           factura.style.display = "none";
         });
       } else {
-        html2pdf().set(opt).from(factura).outputImg().then(img => {
+        html2pdf().set(opciones).from(factura).outputImg().then(img => {
           const link = document.createElement("a");
-          link.download = opt.filename;
+          link.download = opciones.filename;
           link.href = img;
           link.click();
           factura.style.display = "none";
