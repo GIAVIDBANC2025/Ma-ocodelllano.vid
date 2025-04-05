@@ -103,5 +103,41 @@ Fecha: ${fecha}
       localStorage.setItem("datos", JSON.stringify(registros));
     }
   </script>
+
+  <script>
+function guardarFacturaEnBase(factura) {
+  let existentes = JSON.parse(localStorage.getItem("datosFacturas")) || [];
+  existentes.push(factura);
+  localStorage.setItem("datosFacturas", JSON.stringify(existentes));
+}
+
+function registrarFacturaDescargada(formato, archivoURL) {
+  const numeroFactura = document.getElementById("numeroFactura").value || generarNumeroFactura();
+  const cliente = document.getElementById("nombreCliente").value || "Cliente sin nombre";
+  const producto = document.getElementById("producto").value || "Producto";
+  const cantidad = parseInt(document.getElementById("cantidad").value) || 1;
+  const precio = parseFloat(document.getElementById("precio").value.replace(/\./g, '').replace(',', '.')) || 0;
+  const total = cantidad * precio;
+  const fecha = new Date().toLocaleString();
+
+  guardarFacturaEnBase({
+    numero: numeroFactura,
+    cliente,
+    producto,
+    cantidad,
+    precio,
+    total,
+    fecha,
+    formato,
+    archivo: archivoURL
+  });
+}
+
+// Opcional: Si no tienes número automático
+function generarNumeroFactura() {
+  return Math.floor(Math.random() * 900000 + 100000).toString();
+}
+                                                                                               </script>
+  
 </body>
 </html>
