@@ -1,97 +1,75 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Base de Datos de Facturas</title>
+  <title>Base de Datos - Facturas</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #333; color: #fff; }
-    input { padding: 10px; width: 100%; max-width: 400px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; }
-    a.descargar { text-decoration: none; color: #0066cc; font-weight: bold; }
-    a.descargar:hover { text-decoration: underline; }
+    body { font-family: Arial; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    input { padding: 6px; width: 250px; }
+    button { padding: 6px 12px; }
   </style>
 </head>
 <body>
-  <h1>Base de Datos de Facturas</h1>
-  <input type="text" id="buscador" placeholder="Buscar por Cliente o Factura #:" onkeyup="filtrarTabla()">
-  <table id="tablaDatos">
+  <h2>Base de Datos de Facturas</h2>
+  <input type="text" id="busqueda" placeholder="Buscar por nombre o número">
+  <button onclick="buscarFactura()">Buscar</button>
+
+  <table id="tablaFacturas">
     <thead>
       <tr>
-        <th># Factura</th>
-        <th>Cliente</th>
-        <th>Producto</th>
-        <th>Cantidad</th>
-        <th>Precio</th>
-        <th>Total</th>
-        <th>Fecha</th>
-        <th>Formato</th>
+        <th>Nombre</th>
+        <th>Factura</th>
+        <th>Monto</th>
+        <th>Tipo</th>
         <th>Descargar</th>
       </tr>
     </thead>
-    <tbody>
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    const facturasDemo = [
-      {
-        numero: "336183",
-        cliente: "Camila López",
-        producto: "Servicio de Asesoría Premium",
-        cantidad: 1,
-        precio: 150000,
-        total: 150000,
-        fecha: "2025-04-05 10:30 AM",
-        formato: "PDF",
-        archivo: "facturas/factura-336183.pdf"
-      },
-      {
-        numero: "336184",
-        cliente: "Carlos Pérez",
-        producto: "Diseño gráfico",
-        cantidad: 2,
-        precio: 70000,
-        total: 140000,
-        fecha: "2025-04-05 11:00 AM",
-        formato: "PNG",
-        archivo: "facturas/factura-336184.png"
-      }
-    ];
-
-    function cargarDatos() {
-      const registrosGuardados = JSON.parse(localStorage.getItem("datos")) || [];
-      const registros = [...registrosGuardados, ...facturasDemo];
-      const tabla = document.querySelector("#tablaDatos tbody");
-      tabla.innerHTML = "";
+    function cargarFacturas() {
+      const registros = JSON.parse(localStorage.getItem("facturas")) || [];
+      const cuerpo = document.querySelector("#tablaFacturas tbody");
+      cuerpo.innerHTML = "";
       registros.forEach(reg => {
         const fila = document.createElement("tr");
         fila.innerHTML = `
-          <td>${reg.numero}</td>
-          <td>${reg.cliente}</td>
-          <td>${reg.producto}</td>
-          <td>${reg.cantidad}</td>
-          <td>$${parseFloat(reg.precio).toLocaleString()}</td>
-          <td>$${parseFloat(reg.total).toLocaleString()}</td>
-          <td>${reg.fecha}</td>
-          <td>${reg.formato}</td>
-          <td><a class="descargar" href="${reg.archivo}" target="_blank">Descargar</a></td>
+          <td>${reg.nombre}</td>
+          <td>${reg.factura}</td>
+          <td>${reg.monto}</td>
+          <td>${reg.tipo}</td>
+          <td><a href="${reg.url}" target="_blank">Descargar</a></td>
         `;
-        tabla.appendChild(fila);
+        cuerpo.appendChild(fila);
       });
     }
 
-    function filtrarTabla() {
-      const input = document.getElementById("buscador").value.toLowerCase();
-      const filas = document.querySelectorAll("#tablaDatos tbody tr");
-      filas.forEach(fila => {
-        const texto = fila.innerText.toLowerCase();
-        fila.style.display = texto.includes(input) ? "" : "none";
+    function buscarFactura() {
+      const texto = document.getElementById("busqueda").value.toLowerCase();
+      const registros = JSON.parse(localStorage.getItem("facturas")) || [];
+      const cuerpo = document.querySelector("#tablaFacturas tbody");
+      cuerpo.innerHTML = "";
+      registros.filter(reg =>
+        reg.nombre.toLowerCase().includes(texto) ||
+        reg.factura.toLowerCase().includes(texto)
+      ).forEach(reg => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${reg.nombre}</td>
+          <td>${reg.factura}</td>
+          <td>${reg.monto}</td>
+          <td>${reg.tipo}</td>
+          <td><a href="${reg.url}" target="_blank">Descargar</a></td>
+        `;
+        cuerpo.appendChild(fila);
       });
     }
 
-    window.onload = cargarDatos;
+    window.onload = cargarFacturas;
   </script>
 </body>
 </html>
