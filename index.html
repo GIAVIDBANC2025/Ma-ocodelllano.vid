@@ -82,7 +82,7 @@
 <body>
   <div class="container" id="comprobante">
     <div class="header">
-      <img src="'Más contento que un político en navidad'.webp.jpg" class="logo" alt="Logo">
+      <img src="Logo Mañoco.png" class="logo" alt="Logo">
       <h2>Mañoco del Llano - Distribuido y Comercializado a Nivel Nacional e Internacional</h2>
       <p><strong>¡Come Mañoco y vive al 100!</strong></p>
     </div>
@@ -281,79 +281,6 @@
     </div>
     
 
-<!-- html2canvas + jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<!-- Botón flotante -->
-<button id="generarComprobanteBtn"
-  style="position:fixed; bottom:20px; right:20px; z-index:9999; background:#3498db; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">
-  Generar Comprobante
-</button>
-
-<!-- Comprobante oculto -->
-<div id="comprobanteGenerado" style="display:none; width:400px; padding:20px; background:#fff; border:1px solid #ccc; font-family:'Segoe UI', sans-serif;">
-  <div style="text-align:center;">
-    <img src="https://via.placeholder.com/100x50?text=Logo" style="max-width:120px; margin-bottom:10px;">
-    <h3 style="margin:5px 0;">EMPRESA XYZ</h3>
-    <p style="font-size:12px;">NIT 1234567890 - Dirección Empresa</p>
-  </div>
-  <hr>
-  <p><strong>Factura N°:</strong> <span id="facturaId">#0001</span></p>
-  <p><strong>Cliente:</strong> <span id="c_nombre"></span></p>
-  <p><strong>Dirección:</strong> <span id="c_direccion"></span></p>
-  <p><strong>Detalle:</strong><br><span id="c_producto"></span></p>
-  <p><strong>Total a pagar:</strong> $<span id="c_total"></span></p>
-  <p style="text-align:right; font-size:12px;"><em><span id="c_fecha"></span></em></p>
-</div>
-
-<script>
-  document.getElementById("generarComprobanteBtn").addEventListener("click", async function () {
-    // Extraer automáticamente desde la página (puedes personalizar estos selectores)
-    const nombre = document.getElementById("clienteNombre")?.innerText || "Sin nombre";
-    const direccion = document.querySelector(".direccion")?.innerText || "Sin dirección";
-    const producto = document.getElementById("productoDescripcion")?.innerText || "Sin descripción";
-    const total = document.querySelector(".totalFinal")?.innerText.replace(/[^0-9.,]/g, '') || "0.00";
-
-    // Insertar en el comprobante
-    document.getElementById("c_nombre").innerText = nombre;
-    document.getElementById("c_direccion").innerText = direccion;
-    document.getElementById("c_producto").innerText = producto;
-    document.getElementById("c_total").innerText = total;
-    document.getElementById("c_fecha").innerText = new Date().toLocaleString();
-
-    const comprobante = document.getElementById("comprobanteGenerado");
-    comprobante.style.display = "block";
-
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    html2canvas(comprobante).then(canvas => {
-      // PNG
-      const pngLink = document.createElement("a");
-      pngLink.download = "comprobante.png";
-      pngLink.href = canvas.toDataURL("image/png");
-      pngLink.click();
-
-      // JPG
-      const jpgLink = document.createElement("a");
-      jpgLink.download = "comprobante.jpg";
-      jpgLink.href = canvas.toDataURL("image/jpeg", 0.95);
-      jpgLink.click();
-
-      // PDF
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF();
-      const imgData = canvas.toDataURL("image/jpeg", 1.0);
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = 180;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'JPEG', 15, 20, pdfWidth, pdfHeight);
-      pdf.save("comprobante.pdf");
-
-      comprobante.style.display = "none";
-    });
-  });
-</script>
 
 
 
