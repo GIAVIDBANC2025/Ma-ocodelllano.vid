@@ -121,53 +121,241 @@
       <textarea></textarea>
     </div>
 
-    <div class="product-section">
-      <h3>Productos</h3>
-      <table id="productos">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>Unidad</th>
-            <th>Precio</th>
-            <th>Estado</th>
-            <th>Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text"></td>
-            <td><input type="text"></td>
-            <td><input type="number" class="cantidad"></td>
-            <td>
-              <select>
-                <option>Libra</option>
-                <option>Kilo</option>
-                <option>Arroba</option>
-                <option>Tonelada</option>
-              </select>
-            </td>
-            <td><input type="text" class="precio"></td>
-            <td>
-              <select>
-                <option>Por pagar</option>
-                <option>Cancelado</option>
-              </select>
-            </td>
-            <td class="subtotal">$0,00</td>
-          </tr>
-        </tbody>
-      </table>
-      <button onclick="agregarProducto()">Agregar producto</button>
-      <p class="total">Total: <span id="total">$0,00</span></p>
-    </div>
+    <style>
+  .tabla-vertical-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .producto-box {
+    background: #fff;
+    border: 2px solid #FFA726;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
+  }
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .campo label {
+    font-weight: bold;
+    color: #FF9800;
+    margin-bottom: 4px;
+  }
+
+  .campo input,
+  .campo select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+  }
+
+  .subtotal-box {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .total-general {
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #E65100;
+    margin-top: 15px;
+  }
+
+  .btn-agregar {
+    display: block;
+    margin: 15px auto;
+    padding: 10px 25px;
+    font-weight: bold;
+    color: white;
+    background: #FB8C00;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+</style>
+
+<div class="tabla-vertical-container">
+  <div id="contenedor-productos"></div>
+</div>
+
+<button class="btn-agregar" onclick="agregarProductoVertical()">Agregar producto</button>
+<p class="total-general">Total: <span id="total-general">$0,00</span></p>
+
+<script>
+  let contador = 0;
+
+  function agregarProductoVertical() {
+    contador++;
+    const contenedor = document.getElementById("contenedor-productos");
+
+    const productoHTML = `
+      <div class="producto-box" id="producto-${contador}">
+        <div class="campo">
+          <label>Producto</label>
+          <input type="text">
+        </div>
+        <div class="campo">
+          <label>Descripción</label>
+          <input type="text">
+        </div>
+        <div class="campo">
+          <label>Cantidad</label>
+          <input type="number" class="cantidad" oninput="calcularSubtotales()">
+        </div>
+        <div class="campo">
+          <label>Unidad</label>
+          <select>
+            <option>Libra</option>
+            <option>Kilo</option>
+            <option>Arroba</option>
+            <option>Tonelada</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Precio</label>
+          <input type="text" class="precio"
+           oninput="calcularSubtotales()">
+        </div>
+        <div class="campo">
+          <label>Estado</label>
+          <select>
+            <option>Por pagar</option>
+            <option>Cancelado</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Subtotal</label>
+          <div class="subtotal-box">$0,00</div>
+        </div>
+      </div>
+    `;
+    contenedor.insertAdjacentHTML("beforeend", productoHTML);
+  }
+
+  function calcularSubtotales() {
+    let total = 0;
+    document.querySelectorAll('.producto-box').forEach(producto => {
+      const cantidad = parseFloat(producto.querySelector('.cantidad')?.value.replace(',', '.') || 0);
+      const precio = parseFloat(producto.querySelector('.precio')?.value.replace(',', '.') || 0);
+      const subtotal = cantidad * precio;
+
+      producto.querySelector('.subtotal-box').innerText = subtotal.toLocaleString('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 2
+      });
+
+      total += subtotal;
+    });
+
+    document.getElementById('total-general').innerText = total.toLocaleString('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 2
+    });
+  }
+
+  // Cargar al menos un producto al inicio
+  agregarProductoVertical();
+</script>
 
     <div class="signature">
       <h4>Firma del Vendedor:</h4>
       <input type="text" placeholder="Firma aquí">
     </div>
     
+
+<!-- html2canvas + jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Botón flotante -->
+<button id="generarComprobanteBtn"
+  style="position:fixed; bottom:20px; right:20px; z-index:9999; background:#3498db; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">
+  Generar Comprobante
+</button>
+
+<!-- Comprobante oculto -->
+<div id="comprobanteGenerado" style="display:none; width:400px; padding:20px; background:#fff; border:1px solid #ccc; font-family:'Segoe UI', sans-serif;">
+  <div style="text-align:center;">
+    <img src="https://via.placeholder.com/100x50?text=Logo" style="max-width:120px; margin-bottom:10px;">
+    <h3 style="margin:5px 0;">EMPRESA XYZ</h3>
+    <p style="font-size:12px;">NIT 1234567890 - Dirección Empresa</p>
+  </div>
+  <hr>
+  <p><strong>Factura N°:</strong> <span id="facturaId">#0001</span></p>
+  <p><strong>Cliente:</strong> <span id="c_nombre"></span></p>
+  <p><strong>Dirección:</strong> <span id="c_direccion"></span></p>
+  <p><strong>Detalle:</strong><br><span id="c_producto"></span></p>
+  <p><strong>Total a pagar:</strong> $<span id="c_total"></span></p>
+  <p style="text-align:right; font-size:12px;"><em><span id="c_fecha"></span></em></p>
+</div>
+
+<script>
+  document.getElementById("generarComprobanteBtn").addEventListener("click", async function () {
+    // Extraer automáticamente desde la página (puedes personalizar estos selectores)
+    const nombre = document.getElementById("clienteNombre")?.innerText || "Sin nombre";
+    const direccion = document.querySelector(".direccion")?.innerText || "Sin dirección";
+    const producto = document.getElementById("productoDescripcion")?.innerText || "Sin descripción";
+    const total = document.querySelector(".totalFinal")?.innerText.replace(/[^0-9.,]/g, '') || "0.00";
+
+    // Insertar en el comprobante
+    document.getElementById("c_nombre").innerText = nombre;
+    document.getElementById("c_direccion").innerText = direccion;
+    document.getElementById("c_producto").innerText = producto;
+    document.getElementById("c_total").innerText = total;
+    document.getElementById("c_fecha").innerText = new Date().toLocaleString();
+
+    const comprobante = document.getElementById("comprobanteGenerado");
+    comprobante.style.display = "block";
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    html2canvas(comprobante).then(canvas => {
+      // PNG
+      const pngLink = document.createElement("a");
+      pngLink.download = "comprobante.png";
+      pngLink.href = canvas.toDataURL("image/png");
+      pngLink.click();
+
+      // JPG
+      const jpgLink = document.createElement("a");
+      jpgLink.download = "comprobante.jpg";
+      jpgLink.href = canvas.toDataURL("image/jpeg", 0.95);
+      jpgLink.click();
+
+      // PDF
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = 180;
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'JPEG', 15, 20, pdfWidth, pdfHeight);
+      pdf.save("comprobante.pdf");
+
+      comprobante.style.display = "none";
+    });
+  });
+</script>
+
+
 
     <div class="btns">
       <button onclick="descargar('pdf')">Descargar PDF</button>
@@ -181,6 +369,9 @@
       <p>© Derechos Reservados 2025 Mañoco del Llano - ¡Come Mañoco y vive al 100!</p>
     </div>
   </div>
+
+
+
 
 <script>
   document.getElementById('factura-numero').innerText = Math.floor(100000 + Math.random() * 900000);
@@ -234,5 +425,7 @@
     }
   }
 </script>
+
+
 </body>
 </html>
